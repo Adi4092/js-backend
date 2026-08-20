@@ -26,6 +26,6 @@ const registerUser = asyncHandler(async (req,res) => {
         throw new ApiError(400,"all fields are required")
     }
 
-})//we handle text fields in req.body
+})//We handle text fields in req.body
 
 export {registerUser}

@@ -18,6 +18,6 @@ router.route("/register").post(
     //upload.array() --> single field + multiple files
     //upload.single() --> single field + single file
     registerUser
-)//we handle files in req.files
+)//We handle files in req.files
 
 export default router

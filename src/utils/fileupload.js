@@ -2,18 +2,18 @@ import {v2 as cloudinary} from "cloudinary"
 import fs from "fs" //file system =>to work with files on your server 
 //for example deleting a temporary file after uploading it to Cloudinary.
 
-const uploadOnCloudinary = async (localeFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
-        if(!localeFilePath) return null
+        if(!localFilePath) return null
         //upload file on cloudinary
-        const response = await cloudinary.uploader.upload(localeFilePath,{
+        const response = await cloudinary.uploader.upload(localFilePath,{
             resource_type:"auto"
         })
         //file is uploaded successfully
         console.log("file is uploaded on cloudinary",response.url);
         return response 
     } catch (error) {
-        fs.unlinkSync(localeFilePath)//removes the locally saved temporary file 
+        fs.unlinkSync(localFilePath)//removes the locally saved temporary file 
         //as the upload operation got failed
         return null
     }
@@ -24,3 +24,5 @@ cloudinary.config({
     api_key:process.env.CLOUDINARY_API_KEY,
     api_secret:process.env.CLOUDINARY_API_SECRET
 });
+
+export {uploadOnCloudinary}

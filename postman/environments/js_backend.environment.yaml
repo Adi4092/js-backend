@@ -1,0 +1,4 @@
+name: js_backend
+values:
+  - key: server
+    value: ''

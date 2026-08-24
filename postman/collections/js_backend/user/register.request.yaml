@@ -1,0 +1,41 @@
+$kind: http-request
+name: register
+description: ""
+url: "{{server}}/users/register"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: fullname
+      value: aditya bhoite
+      description: ""
+      disabled: false
+    - type: text
+      key: email
+      value: aditya@gmail.com
+      description: ""
+      disabled: false
+    - type: text
+      key: password
+      value: "12345678"
+      description: ""
+      disabled: false
+    - type: text
+      key: username
+      value: adi4092
+      description: ""
+      disabled: false
+    - type: file
+      key: avatar
+      src:
+        - postman-cloud:///1f19ebd9-cdc0-4af0-b51e-7f70d8614878
+      description: ""
+      disabled: false
+    - type: file
+      key: coverImage
+      src:
+        - postman-cloud:///1f19ebdb-5c48-49c0-abbb-1a73e641ccaf
+      description: ""
+      disabled: false
+order: 1787480757769

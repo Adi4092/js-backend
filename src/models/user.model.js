@@ -42,16 +42,15 @@ const userSchema = new mongoose.Schema({
         required:[true,"password is required"],//custom error msg
     },
     refreshToken:{
-        types:String,    
+        type:String,    
     }
 
 },{timestamps:true})
 
-userSchema.pre("save",async function (next){
-    if(!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if(!this.isModified("password")) return;
 
-    this.password = await bcrypt.hash(this.password,10)
-    next()
+    this.password = await bcrypt.hash(this.password, 10);
 })
 //this is a HOOK function that runs before saving a user document to the database.
 // It checks if the password field has been modified, and if so, 

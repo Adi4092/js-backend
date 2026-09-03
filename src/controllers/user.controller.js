@@ -4,6 +4,21 @@ import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/fileupload.js";
 import { APIresponse } from "../utils/APIresponse.js";
 
+const generateAccessAndRefreshToken = async (userId) => {
+    try {
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+
+        user.refreshToken = refreshToken
+        user.save({ validateBeforeSave: false })
+
+        return { accessToken, refreshToken }
+    } catch (error) {
+        throw new ApiError(500, "something went wrong while generating access and refresh token")
+    }
+}
+
 const registerUser = asyncHandler(async (req, res) => {
     //get user info from frontend
     //validation - not empty
@@ -94,4 +109,96 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 })
 
-export { registerUser }
+const loginUser = asyncHandler(async (req, res) => {
+
+    //get user info from frontend
+    //username or email
+    //find the user
+    //password check
+    //refresh n access token
+    //send cookies 
+
+    //get user info from frontend
+    const { username, email, password } = req.body
+
+    //username or email check
+    if (!(username || !email)) {
+        throw new ApiError(400, "username or email is required")
+    }
+
+    //find the user
+    const user = await User.findOne({
+        $or: [{ username }, { email }]
+    })
+
+    if (!user) {
+        throw new ApiError(404, "user does not exist")
+    }
+
+    //password check
+    const isPassValid = await user.isPasswordCorrect(password)
+    //methods created by you(isPasswordCorrect(),generateaccesstoken()) can be accessed through "user" not "User" which we have taken fromm database
+    //bcz "User" is the instance of mongoose and it can access methods like findOne(),findById()
+
+    if (!isPassValid) {
+        throw new ApiError(401, "invalid user credentials")
+    }
+
+    //access and refresh token
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+
+
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+    //send cookies
+    const options = {
+        httpOnly: true,
+        secure: true
+        //If set "true" cookies cannot be modified from frontend 
+    }
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new APIresponse(
+                200,
+                {
+                    user: loggedInUser, accessToken, refreshToken
+                },
+                "Logged In Successfully")
+        )
+
+
+})
+
+const logoutUser = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+        //If set "true" cookies cannot be modified from frontend 
+    }
+
+    return res.status(
+        200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new APIresponse(200, {}, "user logged out successfully"))
+
+
+})
+
+export { registerUser, loginUser, logoutUser }

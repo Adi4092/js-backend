@@ -3,52 +3,52 @@ import jwt from "jsonwebtoken"//for authentication authenticates user after logi
 import bcrypt from "bcrypt"//to hash the password protect the password
 
 const userSchema = new mongoose.Schema({
-    username:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true,
-        trim:true,//to remove extra spaces from beginning and end
-        index:true//Makes searches faster
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,//to remove extra spaces from beginning and end
+        index: true//Makes searches faster
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true,
-        trim:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
     },
-    fullname:{
-        type:String,
-        required:true,
-        trim:true,
-        index:true
+    fullname: {
+        type: String,
+        required: true,
+        trim: true,
+        index: true
     },
-    avatar:{//profile picture
-        type:String,//cloudinary url
-        required:true
+    avatar: {//profile picture
+        type: String,//cloudinary url
+        required: true
     },
-    coverImage:{
-        type:String,   
+    coverImage: {
+        type: String,
     },
-    watchHistory:[
+    watchHistory: [
         {
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"Video"
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Video"
         }
     ],
-    password:{
-        type:String,
-        required:[true,"password is required"],//custom error msg
+    password: {
+        type: String,
+        required: [true, "password is required"],//custom error msg
     },
-    refreshToken:{
-        type:String,    
+    refreshToken: {
+        type: String,
     }
 
-},{timestamps:true})
+}, { timestamps: true })
 
 userSchema.pre("save", async function () {
-    if(!this.isModified("password")) return;
+    if (!this.isModified("password")) return;
 
     this.password = await bcrypt.hash(this.password, 10);
 })
@@ -56,32 +56,35 @@ userSchema.pre("save", async function () {
 // It checks if the password field has been modified, and if so, 
 // it hashes the password using bcrypt before saving it.
 
-userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password,this.password)
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password)
 }
 
-userSchema.methods.generateAccessToken=function (){
+//short lived token
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign({
-        _id:this._id,
-        email:this.email,
-        fullname:this.fullname,
-        username:this.username
+        _id: this._id,
+        email: this.email,
+        fullname: this.fullname,
+        username: this.username
     },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
-    }
-)
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+
+    //long lived token
 }
-userSchema.methods.generateRefreshToken=function (){
-        return jwt.sign({
-        _id:this._id,
+userSchema.methods.generateRefreshToken = function () {
+    return jwt.sign({
+        _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
-        expiresIn:process.env.REFRESH_TOKEN_EXPIRY
-    }
-)
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
 }
 
-export const User = mongoose.model("User",userSchema)
+export const User = mongoose.model("User", userSchema)

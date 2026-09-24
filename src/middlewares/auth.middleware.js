@@ -16,7 +16,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         //check whether token is correct or not & get payload
         const decodedtoken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
-        //find user in DB using if from decodedToken
+        //find user in DB using id from decodedToken
         const user = await User.findById(decodedtoken._id)
             .select("-password -refreshToken")
 

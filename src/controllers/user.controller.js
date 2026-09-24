@@ -268,7 +268,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
     //old pass check
     if (!isPassCorrect) {
-        throw new apierror(400, "Invalid Credentials")
+        throw new ApiError(400, "Invalid Credentials")
     }
 
     //new pass enter and save 
@@ -292,18 +292,18 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 })
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-    const { newfullname, newEmail } = req.body
+    const { fullname, email } = req.body
 
-    if (!(fullname || email)) {
-        throw new ApiError(400, "all fields are required")
+    if (!fullname && !email) {
+        throw new ApiError(400, "All fields are required")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {
-                fullname: newfullname,
-                email: newEmail
+                fullname,
+                email
             }
         },
         {
@@ -380,6 +380,77 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             new APIresponse(200, { user }, "cover image updated successfully")
         )
 })
+
+const getUserChanneProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params //req.params is used to identify a specific resource using the URL
+
+    if (!username?.trim()) {
+        throw new ApiError(400, "username is missing")
+    }
+
+    const channel = await User.aggregate([
+        {
+            $match: {//filter documents with matching fields
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: { //connect data from two different MongoDB collections
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {//adds new field to aggregation doc 
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {//decide which fields you want in the final aggregation result
+                fullname: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelsSubscribedToCount: 1,
+                isSubscribed: 1,
+                email: 1,
+                avatar: 1,
+                coverImage: 1
+            }
+        }
+    ])
+
+    if (!channel?.length) {
+        throw new ApiError(400, "channel does not exist")
+    }
+
+    res
+        .status(200)
+        .json(
+            new APIresponse(200, channel[0], "user channel fetched successfully")
+        )
+})
 export {
     registerUser,
     loginUser,
@@ -389,5 +460,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChanneProfile
 }

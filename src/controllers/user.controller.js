@@ -5,6 +5,8 @@ import { uploadOnCloudinary } from "../utils/fileupload.js";
 import { APIresponse } from "../utils/APIresponse.js";
 import jwt from "jsonwebtoken"
 import { upload } from "../middlewares/multer.middleware.js";
+import mongoose from "mongoose";
+
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -179,8 +181,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1 //this removes the field from document
             }
         },
         {
@@ -321,6 +323,12 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.file?.path
 
+    // const olduser = await User.findById(req.user?._id)
+
+    // const oldAvatar = olduser.avatar
+
+    // const oldPublicId = oldAvatar.split("/").pop().split(".")[0]
+
     if (!avatarLocalPath) {
         throw new ApiError(400, "avatar is missing")
     }
@@ -342,6 +350,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         }
     ).select("-password -refreshToken")
 
+    //await cloudinary.uploader.destroy(oldPublicId)
+
     res
         .status(200)
         .json(
@@ -351,6 +361,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path
+
+    // const olduser = await User.findById(req.user?._id)
+
+    // const oldCoverImage = olduser.coverImage
+
+    // const oldPublicId = oldCoverImage.split("/").pop().split(".")[0]
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "cover image is missing")
@@ -373,6 +389,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             new: true
         }
     ).select("-password -refreshToken")
+
+    //await cloudinary.uploader.destroy(oldPublicId)
 
     res
         .status(200)
@@ -495,10 +513,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         }
     ])
 
-    res
+    return res
         .status(200)
         .json(
-            new APIresponse(200, user[0], watchHistory, "watch history fetched successfully")
+            new APIresponse(200, user[0]?.watchHistory || [], "watch history fetched successfully")
         )
 })
 

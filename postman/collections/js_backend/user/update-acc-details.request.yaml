@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{server}}/users/update-acc-details"
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\":\"wxyz@gmail.com\",\r
+
+    \    \"fullname\":\"aditya sandesh bhoite\"\r
+
+    }"
+order: 4462299620216199

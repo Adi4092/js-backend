@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{server}}/users/update-user-cover"
+method: PATCH
+body:
+  type: formdata
+  content:
+    - type: file
+      key: coverImage
+      src:
+        - /C:/Users/sbhoe/OneDrive/Pictures/Picsart_24-12-24_20-57-38-058[1].jpg
+      description: ""
+      disabled: false
+order: 4487631269571229

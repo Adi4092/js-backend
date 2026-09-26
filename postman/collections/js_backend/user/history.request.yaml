@@ -1,0 +1,5 @@
+$kind: http-request
+description: ""
+url: "{{server}}/users/history"
+method: GET
+order: 4499429448262684

@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{server}}/users/update-user-avatar"
+method: PATCH
+body:
+  type: formdata
+  content:
+    - type: file
+      key: avatar
+      src:
+        - /C:/Users/sbhoe/OneDrive/Pictures/your dream company is microsoft but you are student from D y patil and doing tp coz you are a chill guy.png
+      description: ""
+      disabled: false
+order: 4464118203365531

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamPulse | Modern Video Sharing Platform</title>
+    <meta name="description" content="A state-of-the-art video sharing and community platform powered by Node.js, Express, MongoDB, and Cloudinary.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-left">
+            <a href="#" class="brand-logo" id="home-logo">
+                <div class="logo-icon"><i class="ri-play-fill"></i></div>
+                <span class="logo-text">Stream<span class="gradient-text">Pulse</span></span>
+            </a>
+        </div>
+
+        <div class="nav-center">
+            <div class="search-bar">
+                <i class="ri-search-line search-icon"></i>
+                <input type="text" id="search-input" placeholder="Search videos, creators, or topics...">
+                <button class="btn-search" id="btn-search"><i class="ri-search-line"></i></button>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn btn-gradient" id="btn-open-upload" style="display: none;">
+                <i class="ri-upload-cloud-2-line"></i> Upload Video
+            </button>
+
+            <div class="auth-buttons" id="auth-buttons">
+                <button class="btn btn-secondary" id="btn-open-login">Sign In</button>
+                <button class="btn btn-primary" id="btn-open-register">Get Started</button>
+            </div>
+
+            <div class="user-profile-menu" id="user-profile-menu" style="display: none;">
+                <div class="user-avatar-wrapper" id="user-avatar-trigger">
+                    <img id="user-avatar-img" src="" alt="User Avatar">
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="dropdown-menu" id="user-dropdown">
+                    <div class="dropdown-header">
+                        <strong id="dropdown-user-fullname">User Fullname</strong>
+                        <span id="dropdown-user-username">@username</span>
+                    </div>
+                    <hr class="dropdown-divider">
+                    <a href="#" class="dropdown-item" id="nav-item-dashboard"><i class="ri-dashboard-3-line"></i> Creator Studio</a>
+                    <a href="#" class="dropdown-item" id="nav-item-history"><i class="ri-history-line"></i> Watch History</a>
+                    <a href="#" class="dropdown-item" id="nav-item-liked"><i class="ri-heart-3-line"></i> Liked Videos</a>
+                    <hr class="dropdown-divider">
+                    <a href="#" class="dropdown-item danger" id="btn-logout"><i class="ri-logout-box-r-line"></i> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Body -->
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-item active" data-tab="feed">
+                    <i class="ri-compass-3-line"></i> <span>Explore Feed</span>
+                </a>
+                <a href="#" class="sidebar-item" data-tab="tweets">
+                    <i class="ri-message-3-line"></i> <span>Community Posts</span>
+                </a>
+                <a href="#" class="sidebar-item" data-tab="history">
+                    <i class="ri-history-line"></i> <span>History</span>
+                </a>
+                <a href="#" class="sidebar-item" data-tab="liked">
+                    <i class="ri-heart-line"></i> <span>Liked Videos</span>
+                </a>
+                <a href="#" class="sidebar-item" data-tab="dashboard">
+                    <i class="ri-dashboard-line"></i> <span>Creator Studio</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="footer-card">
+                    <i class="ri-rocket-line gradient-icon"></i>
+                    <h4>Backend Active</h4>
+                    <p>Connected to Node.js & MongoDB</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content View Container -->
+        <main class="main-content">
+            <!-- Feed View -->
+            <section id="view-feed" class="content-view active">
+                <div class="category-pills">
+                    <button class="pill active">All</button>
+                    <button class="pill">Gaming</button>
+                    <button class="pill">Coding</button>
+                    <button class="pill">Music</button>
+                    <button class="pill">Podcasts</button>
+                    <button class="pill">Tech</button>
+                </div>
+
+                <div class="section-header">
+                    <h2>Trending Videos</h2>
+                    <span class="badge" id="video-count-badge">Loading videos...</span>
+                </div>
+
+                <div class="video-grid" id="video-grid">
+                    <!-- Dynamic Video Cards -->
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </section>
+
+            <!-- Community Posts / Tweets View -->
+            <section id="view-tweets" class="content-view">
+                <div class="section-header">
+                    <h2>Community Feed</h2>
+                    <p>Share thoughts, updates, and discussions with your audience</p>
+                </div>
+
+                <div class="create-post-card" id="create-post-card" style="display: none;">
+                    <textarea id="tweet-input" placeholder="What's happening? Share a post..."></textarea>
+                    <div class="post-actions">
+                        <span class="char-counter"><span id="tweet-char-count">0</span>/280</span>
+                        <button class="btn btn-primary" id="btn-submit-tweet"><i class="ri-send-plane-fill"></i> Post</button>
+                    </div>
+                </div>
+
+                <div class="tweets-list" id="tweets-list">
+                    <div class="empty-state">
+                        <i class="ri-message-3-line"></i>
+                        <h3>No Posts Yet</h3>
+                        <p>Sign in to share your first community post!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Watch History View -->
+            <section id="view-history" class="content-view">
+                <div class="section-header">
+                    <h2>Watch History</h2>
+                    <p>Videos you've recently watched</p>
+                </div>
+                <div class="video-grid" id="history-grid"></div>
+            </section>
+
+            <!-- Liked Videos View -->
+            <section id="view-liked" class="content-view">
+                <div class="section-header">
+                    <h2>Liked Videos</h2>
+                    <p>Videos you gave a thumbs up</p>
+                </div>
+                <div class="video-grid" id="liked-grid"></div>
+            </section>
+
+            <!-- Creator Dashboard View -->
+            <section id="view-dashboard" class="content-view">
+                <div class="section-header">
+                    <h2>Creator Studio Dashboard</h2>
+                    <button class="btn btn-gradient" id="btn-open-upload-dash">
+                        <i class="ri-upload-cloud-2-line"></i> Upload New Video
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="ri-eye-line"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Views</span>
+                            <h3 id="stat-total-views">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon coral"><i class="ri-user-heart-line"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Subscribers</span>
+                            <h3 id="stat-total-subscribers">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon cyan"><i class="ri-film-line"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Videos</span>
+                            <h3 id="stat-total-videos">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="ri-thumb-up-line"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Likes</span>
+                            <h3 id="stat-total-likes">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-table-container">
+                    <h3>Uploaded Content</h3>
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Video Title</th>
+                                <th>Views</th>
+                                <th>Likes</th>
+                                <th>Uploaded Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dash-videos-tbody">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div class="modal" id="modal-player">
+        <div class="modal-content modal-player-content">
+            <button class="btn-close-modal" id="btn-close-player">&times;</button>
+            <div class="player-wrapper">
+                <video id="main-video-element" controls autoplay></video>
+            </div>
+            <div class="player-details">
+                <h2 id="player-title">Video Title</h2>
+                <div class="player-meta">
+                    <div class="player-owner-info">
+                        <img id="player-owner-avatar" src="" alt="Owner Avatar">
+                        <div>
+                            <h4 id="player-owner-fullname">Owner Name</h4>
+                            <span id="player-owner-subs">0 subscribers</span>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-toggle-sub">Subscribe</button>
+                    </div>
+                    <div class="player-actions">
+                        <button class="btn btn-secondary" id="btn-toggle-like">
+                            <i class="ri-thumb-up-line" id="like-icon"></i> <span id="like-count">0</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="player-description" id="player-description"></p>
+                <hr class="divider">
+                
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <h3>Comments <span id="comments-count">(0)</span></h3>
+                    <div class="add-comment-box" id="add-comment-box" style="display:none;">
+                        <input type="text" id="comment-input" placeholder="Add a public comment...">
+                        <button class="btn btn-primary" id="btn-submit-comment">Comment</button>
+                    </div>
+                    <div class="comments-list" id="comments-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Video Modal -->
+    <div class="modal" id="modal-upload">
+        <div class="modal-content">
+            <button class="btn-close-modal" id="btn-close-upload">&times;</button>
+            <h2>Publish New Video</h2>
+            <form id="form-upload">
+                <div class="form-group">
+                    <label>Video Title *</label>
+                    <input type="text" id="upload-title" placeholder="Enter engaging title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="upload-description" placeholder="Enter video description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Video File (MP4/WebM) *</label>
+                        <input type="file" id="upload-videofile" accept="video/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Thumbnail Image *</label>
+                        <input type="file" id="upload-thumbnail" accept="image/*" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-upload">Cancel</button>
+                    <button type="submit" class="btn btn-gradient" id="btn-submit-upload">
+                        <i class="ri-upload-cloud-2-line"></i> Publish Video
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="modal-login">
+        <div class="modal-content modal-auth">
+            <button class="btn-close-modal" id="btn-close-login">&times;</button>
+            <h2>Sign In to StreamPulse</h2>
+            <p>Welcome back! Enter your details below.</p>
+            <form id="form-login">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <input type="text" id="login-username" placeholder="johndoe or john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-gradient btn-full">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="modal-register">
+        <div class="modal-content modal-auth">
+            <button class="btn-close-modal" id="btn-close-register">&times;</button>
+            <h2>Create Account</h2>
+            <p>Join StreamPulse creator community today.</p>
+            <form id="form-register">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="reg-fullname" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" id="reg-username" placeholder="johndoe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="reg-email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label>Profile Avatar Image *</label>
+                    <input type="file" id="reg-avatar" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-gradient btn-full">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <i class="ri-information-line" id="toast-icon"></i>
+        <span id="toast-message">Message text</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
